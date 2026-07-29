@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
+import { jwtVerify } from "jose";
 
-export function middleware(req: NextRequest) {
+const JWT_SECRET = new TextEncoder().encode(
+  process.env.JWT_SECRET!
+);
+
+export async function middleware(req: NextRequest) {
   const token = req.cookies.get("token")?.value;
   const { pathname } = req.nextUrl;
-
-  // Temporary debugging
-  console.log("MIDDLEWARE:", {
-    pathname,
-    hasToken: !!token,
-  });
 
   // Protect Admin Routes
   if (pathname.startsWith("/admin")) {
@@ -18,17 +16,14 @@ export function middleware(req: NextRequest) {
     }
 
     try {
-      const decoded = jwt.verify(
-        token,
-        process.env.JWT_SECRET!
-      ) as {
-        role: string;
-      };
+      const { payload } = await jwtVerify(token, JWT_SECRET);
 
-      if (decoded.role !== "admin") {
+      if (payload.role !== "admin") {
         return NextResponse.redirect(new URL("/", req.url));
       }
-    } catch {
+    } catch (error) {
+      console.error("Admin JWT verification failed:", error);
+
       return NextResponse.redirect(new URL("/login", req.url));
     }
   }
@@ -40,8 +35,10 @@ export function middleware(req: NextRequest) {
     }
 
     try {
-      jwt.verify(token, process.env.JWT_SECRET!);
-    } catch {
+      await jwtVerify(token, JWT_SECRET);
+    } catch (error) {
+      console.error("Dashboard JWT verification failed:", error);
+
       return NextResponse.redirect(new URL("/login", req.url));
     }
   }
