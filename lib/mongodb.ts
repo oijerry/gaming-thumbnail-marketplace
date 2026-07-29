@@ -15,19 +15,26 @@ declare global {
   var mongoose: MongooseCache | undefined;
 }
 
-const cached: MongooseCache = global.mongoose ?? { conn: null, promise: null };
+const cached: MongooseCache = global.mongoose ?? {
+  conn: null,
+  promise: null,
+};
+
 global.mongoose = cached;
 
 export async function connectDB() {
-  if (cached.conn) return cached.conn;
+  if (cached.conn) {
+    return cached.conn;
+  }
 
   if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI, {
+    cached.promise = mongoose.connect(MONGODB_URI!, {
       serverSelectionTimeoutMS: 10000,
       family: 4,
     });
   }
 
   cached.conn = await cached.promise;
+
   return cached.conn;
 }
