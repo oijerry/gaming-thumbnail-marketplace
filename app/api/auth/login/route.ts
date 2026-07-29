@@ -36,7 +36,7 @@ export async function POST(req: Request) {
 
     const token = jwt.sign(
       {
-        id: user._id,
+        id: user._id.toString(),
         email: user.email,
         role: user.role,
       },
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
 
     response.cookies.set("token", token, {
       httpOnly: true,
-      secure: false, // production मध्ये true कर
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 60 * 60 * 24 * 7,
       path: "/",
@@ -61,12 +61,12 @@ export async function POST(req: Request) {
 
     return response;
   } catch (error: any) {
-    console.error(error);
+    console.error("Login Error:", error);
 
     return NextResponse.json(
       {
         success: false,
-        message: error.message,
+        message: error.message || "Something went wrong",
       },
       { status: 500 }
     );
