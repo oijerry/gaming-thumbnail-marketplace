@@ -14,7 +14,14 @@ export default async function TemplateDetails({ params }: Props) {
 
   const { id } = await params;
 
-  const template = (await Template.findById(id).lean()) as ({ _id: string } & Record<string, any>) | null;
+  const template = (await Template.findById(id).lean()) as
+    | {
+        _id: string;
+        title: string;
+        image: string;
+        price: number;
+      }
+    | null;
 
   if (!template) {
     notFound();
@@ -25,10 +32,10 @@ export default async function TemplateDetails({ params }: Props) {
       <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12">
         <TemplateDetailsClient
           templateId={template._id.toString()}
-          amount={template.amount}
-          templateName={template.templateName}
-          customerName={template.customerName}
-          customerImage={template.customerImage}
+          amount={template.price}
+          templateName={template.title}
+          customerName=""
+          customerImage=""
         />
       </div>
     </div>
