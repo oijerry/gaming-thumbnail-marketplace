@@ -185,12 +185,6 @@ try {
         },
       };
 
-      const [customerName, setCustomerName] = useState("");
-
-      const [customerEmail, setCustomerEmail] = useState("");
-
-      
-
       const razorpay = new window.Razorpay(options);
 
       razorpay.open();
