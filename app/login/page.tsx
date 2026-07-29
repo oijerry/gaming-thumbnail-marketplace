@@ -9,12 +9,14 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const login = async () => {
+ const login = async () => {
+  try {
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify({
         email,
         password,
@@ -25,11 +27,16 @@ export default function LoginPage() {
 
     if (data.success) {
       alert("Login Successful ✅");
-      router.push("/");
+      router.push("/dashboard");
+      router.refresh();
     } else {
       alert(data.message);
     }
-  };
+  } catch (error) {
+    console.error("Login Error:", error);
+    alert("Something went wrong");
+  }
+};
 
   return (
     <div className="min-h-screen bg-black flex justify-center items-center">

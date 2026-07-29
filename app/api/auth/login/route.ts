@@ -51,13 +51,13 @@ export async function POST(req: Request) {
       message: "Login Successful",
     });
 
-    response.cookies.set("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7,
-      path: "/",
-    });
+   response.cookies.set("token", token, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax",
+  maxAge: 60 * 60 * 24 * 7,
+  path: "/",
+});
 
     return response;
   } catch (error: any) {

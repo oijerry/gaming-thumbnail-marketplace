@@ -5,6 +5,12 @@ export function middleware(req: NextRequest) {
   const token = req.cookies.get("token")?.value;
   const { pathname } = req.nextUrl;
 
+  // Temporary debugging
+  console.log("MIDDLEWARE:", {
+    pathname,
+    hasToken: !!token,
+  });
+
   // Protect Admin Routes
   if (pathname.startsWith("/admin")) {
     if (!token) {
@@ -15,7 +21,9 @@ export function middleware(req: NextRequest) {
       const decoded = jwt.verify(
         token,
         process.env.JWT_SECRET!
-      ) as { role: string };
+      ) as {
+        role: string;
+      };
 
       if (decoded.role !== "admin") {
         return NextResponse.redirect(new URL("/", req.url));
