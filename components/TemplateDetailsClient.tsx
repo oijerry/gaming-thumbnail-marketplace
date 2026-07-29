@@ -1,0 +1,218 @@
+"use client";
+
+import { useState } from "react";
+
+type Props = {
+  templateId: string;
+  amount: number;
+  templateName: string;
+  customerName: string;
+  customerImage: string;
+};
+
+type RazorpayResponse = {
+  razorpay_order_id?: string;
+  razorpay_payment_id?: string;
+  razorpay_signature?: string;
+};
+
+type RazorpayOptions = {
+  key?: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  order_id: string;
+  handler: (response: RazorpayResponse) => void | Promise<void>;
+  prefill: {
+    name: string;
+  };
+  theme: {
+    color: string;
+  };
+  modal: {
+    ondismiss: () => void;
+  };
+};
+
+type RazorpayInstance = {
+  open: () => void;
+  on: (event: string, callback: () => void) => void;
+};
+
+type RazorpayConstructor = new (
+  options: RazorpayOptions
+) => RazorpayInstance;
+
+declare global {
+  interface Window {
+    Razorpay: RazorpayConstructor;
+  }
+}
+
+export default function PaymentButton({
+  templateId,
+  amount,
+  templateName,
+  customerName,
+  customerImage,
+}: Props) {
+  const [loading, setLoading] = useState(false);
+
+  const handlePayment = async () => {
+    if (!customerName.trim()) {
+  alert("Please enter your name.");
+  return;
+}
+
+if (!customerImage) {
+  alert("Please upload your photo.");
+  return;
+}
+
+setLoading(true);
+
+try {
+  // Step 1 - Create Pending Order
+  const orderRes = await fetch("/api/orders", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      templateId,
+      templateName,
+      customerName,
+      customerImage,
+      price: amount,
+    }),
+  });
+
+  const orderJson = await orderRes.json();
+
+  if (!orderJson.success) {
+    alert(orderJson.message);
+    setLoading(false);
+    return;
+  }
+
+  const mongoOrderId = orderJson.order._id;
+
+  // Step 2 - Create Razorpay Order
+  const paymentRes = await fetch("/api/payment", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      amount,
+    }),
+  });
+
+  const paymentJson = await paymentRes.json();
+
+  if (!paymentJson.success) {
+    alert("Failed to create payment order.");
+    setLoading(false);
+    return;
+  }
+
+        const options: RazorpayOptions = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+
+        amount: paymentJson.order.amount,
+
+        currency: "INR",
+
+        name: "Gaming Thumbnail Marketplace",
+
+        description: templateName,
+
+        order_id: paymentJson.order.id,
+
+        handler: async function (response: RazorpayResponse) {
+          if (
+            !response.razorpay_order_id ||
+            !response.razorpay_payment_id ||
+            !response.razorpay_signature
+          ) {
+            alert("Invalid payment response.");
+            setLoading(false);
+            return;
+          }
+
+          const verifyRes = await fetch("/api/payment/verify", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              orderId: mongoOrderId,
+
+              razorpay_order_id: response.razorpay_order_id,
+
+              razorpay_payment_id: response.razorpay_payment_id,
+
+              razorpay_signature: response.razorpay_signature,
+            }),
+          });
+
+          const verifyJson = await verifyRes.json();
+
+          if (verifyJson.success) {
+            alert("Payment Successful ✅");
+
+            window.location.href = "/dashboard";
+          } else {
+            alert(verifyJson.message || "Payment Verification Failed");
+          }
+
+          setLoading(false);
+        },
+
+        prefill: {
+          name: customerName,
+        },
+
+        theme: {
+          color: "#06b6d4",
+        },
+
+        modal: {
+          ondismiss: () => {
+            setLoading(false);
+          },
+        },
+      };
+
+      const [customerName, setCustomerName] = useState("");
+
+      const [customerEmail, setCustomerEmail] = useState("");
+
+      
+
+      const razorpay = new window.Razorpay(options);
+
+      razorpay.open();
+
+      razorpay.on("payment.failed", () => {
+        alert("Payment Failed ❌");
+        setLoading(false);
+      });
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong.");
+      setLoading(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={handlePayment}
+      disabled={loading}
+      className="w-full mt-8 py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xl font-bold hover:scale-105 transition disabled:opacity-50"
+    >
+      {loading ? "Processing..." : `Pay ₹${amount}`}
+    </button>
+  );
+}
