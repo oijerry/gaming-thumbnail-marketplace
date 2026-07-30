@@ -122,28 +122,44 @@ export default function TemplateDetailsClient({
 
         </div>
 
-        <div className="mt-6">
+       <div className="mt-6">
 
-          <label className="block mb-2">
-            Upload Your Photo
-          </label>
+  <label className="block mb-3 text-lg font-semibold">
+    Upload Your Photo
+  </label>
 
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImage}
-            className="w-full"
-          />
+  <label
+    htmlFor="imageUpload"
+    className="cursor-pointer flex justify-center items-center h-40 rounded-2xl border-2 border-dashed border-cyan-500 bg-zinc-800 hover:bg-zinc-700 transition"
+  >
+    <div className="text-center">
+      <p className="text-cyan-400 text-xl">
+        📷 Click to Upload
+      </p>
 
-          {customerImage && (
-            <img
-              src={customerImage}
-              className="mt-5 rounded-xl border border-cyan-500"
-              alt="Preview"
-            />
-          )}
+      <p className="text-gray-400 mt-2">
+        JPG • PNG • JPEG
+      </p>
+    </div>
+  </label>
 
-        </div>
+  <input
+    id="imageUpload"
+    type="file"
+    accept="image/*"
+    onChange={handleImage}
+    className="hidden"
+  />
+
+  {customerImage && (
+    <img
+      src={customerImage}
+      alt="Preview"
+      className="mt-5 rounded-2xl border-2 border-cyan-500"
+    />
+  )}
+
+</div>
 
                 <div className="mt-8 border-t border-zinc-700 pt-6">
 

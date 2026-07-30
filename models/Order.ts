@@ -21,9 +21,9 @@ const OrderSchema = new mongoose.Schema(
       required: true,
     },
 
-    customerEmail: {
+   customerEmail: {
   type: String,
-  required: true,
+  default: "",
 },
 
     templateName: {
