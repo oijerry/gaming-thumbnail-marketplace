@@ -115,16 +115,16 @@ if (user?.email) {
     });
 
   } catch (error) {
-    console.error(error);
+  console.error("VERIFY ERROR:", error);
 
-    return NextResponse.json(
-      {
-        success: false,
-        message: "Verification Failed",
-      },
-      {
-        status: 500,
-      }
-    );
-  }
+  return NextResponse.json(
+    {
+      success: false,
+      message: error instanceof Error ? error.message : "Verification Failed",
+    },
+    {
+      status: 500,
+    }
+  );
+}
 }
