@@ -1,212 +1,185 @@
 "use client";
 
 import { useState } from "react";
+import PaymentButton from "@/components/Payment/PaymentButton";
+
+type Template = {
+  _id: string;
+  title: string;
+  image: string;
+  category: string;
+  description: string;
+  badge: string;
+  price: number;
+  rating: number;
+  downloads: number;
+};
 
 type Props = {
   templateId: string;
-  amount: number;
-  templateName: string;
-  customerName: string;
-  customerImage: string;
+  template: Template;
 };
 
-type RazorpayResponse = {
-  razorpay_order_id?: string;
-  razorpay_payment_id?: string;
-  razorpay_signature?: string;
-};
-
-type RazorpayOptions = {
-  key?: string;
-  amount: number;
-  currency: string;
-  name: string;
-  description: string;
-  order_id: string;
-  handler: (response: RazorpayResponse) => void | Promise<void>;
-  prefill: {
-    name: string;
-  };
-  theme: {
-    color: string;
-  };
-  modal: {
-    ondismiss: () => void;
-  };
-};
-
-type RazorpayInstance = {
-  open: () => void;
-  on: (event: string, callback: () => void) => void;
-};
-
-type RazorpayConstructor = new (
-  options: RazorpayOptions
-) => RazorpayInstance;
-
-declare global {
-  interface Window {
-    Razorpay: RazorpayConstructor;
-  }
-}
-
-export default function PaymentButton({
+export default function TemplateDetailsClient({
   templateId,
-  amount,
-  templateName,
-  customerName,
-  customerImage,
+  template,
 }: Props) {
-  const [loading, setLoading] = useState(false);
+  const [customerName, setCustomerName] = useState("");
+  const [customerImage, setCustomerImage] = useState("");
 
-  const handlePayment = async () => {
-    if (!customerName.trim()) {
-  alert("Please enter your name.");
-  return;
-}
+  const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
 
-if (!customerImage) {
-  alert("Please upload your photo.");
-  return;
-}
+    if (!file) return;
 
-setLoading(true);
+    const reader = new FileReader();
 
-try {
-  // Step 1 - Create Pending Order
-  const orderRes = await fetch("/api/orders", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      templateId,
-      templateName,
-      customerName,
-      customerImage,
-      price: amount,
-    }),
-  });
+    reader.onloadend = () => {
+      setCustomerImage(reader.result as string);
+    };
 
-  const orderJson = await orderRes.json();
-
-  if (!orderJson.success) {
-    alert(orderJson.message);
-    setLoading(false);
-    return;
-  }
-
-  const mongoOrderId = orderJson.order._id;
-
-  // Step 2 - Create Razorpay Order
-  const paymentRes = await fetch("/api/payment", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      amount,
-    }),
-  });
-
-  const paymentJson = await paymentRes.json();
-
-  if (!paymentJson.success) {
-    alert("Failed to create payment order.");
-    setLoading(false);
-    return;
-  }
-
-        const options: RazorpayOptions = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-
-        amount: paymentJson.order.amount,
-
-        currency: "INR",
-
-        name: "Gaming Thumbnail Marketplace",
-
-        description: templateName,
-
-        order_id: paymentJson.order.id,
-
-        handler: async function (response: RazorpayResponse) {
-          if (
-            !response.razorpay_order_id ||
-            !response.razorpay_payment_id ||
-            !response.razorpay_signature
-          ) {
-            alert("Invalid payment response.");
-            setLoading(false);
-            return;
-          }
-
-          const verifyRes = await fetch("/api/payment/verify", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              orderId: mongoOrderId,
-
-              razorpay_order_id: response.razorpay_order_id,
-
-              razorpay_payment_id: response.razorpay_payment_id,
-
-              razorpay_signature: response.razorpay_signature,
-            }),
-          });
-
-          const verifyJson = await verifyRes.json();
-
-          if (verifyJson.success) {
-            alert("Payment Successful ✅");
-
-            window.location.href = "/dashboard";
-          } else {
-            alert(verifyJson.message || "Payment Verification Failed");
-          }
-
-          setLoading(false);
-        },
-
-        prefill: {
-          name: customerName,
-        },
-
-        theme: {
-          color: "#06b6d4",
-        },
-
-        modal: {
-          ondismiss: () => {
-            setLoading(false);
-          },
-        },
-      };
-
-      const razorpay = new window.Razorpay(options);
-
-      razorpay.open();
-
-      razorpay.on("payment.failed", () => {
-        alert("Payment Failed ❌");
-        setLoading(false);
-      });
-    } catch (error) {
-      console.error(error);
-      alert("Something went wrong.");
-      setLoading(false);
-    }
+    reader.readAsDataURL(file);
   };
 
   return (
-    <button
-      onClick={handlePayment}
-      disabled={loading}
-      className="w-full mt-8 py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xl font-bold hover:scale-105 transition disabled:opacity-50"
-    >
-      {loading ? "Processing..." : `Pay ₹${amount}`}
-    </button>
+    <>
+      {/* LEFT SIDE */}
+
+      <div className="space-y-6">
+
+        <img
+          src={template.image}
+          alt={template.title}
+          className="rounded-2xl border border-cyan-500 w-full"
+        />
+
+        <div>
+
+          <div className="flex items-center gap-3">
+
+            <h1 className="text-4xl font-bold">
+              {template.title}
+            </h1>
+
+            {template.badge && (
+              <span className="bg-cyan-500 px-3 py-1 rounded-full text-sm">
+                {template.badge}
+              </span>
+            )}
+
+          </div>
+
+          <p className="text-gray-400 mt-4">
+            {template.description}
+          </p>
+
+          <div className="flex gap-8 mt-6">
+
+            <p>
+              ⭐ {template.rating}
+            </p>
+
+            <p>
+              ⬇ {template.downloads}
+            </p>
+
+            <p>
+              🎮 {template.category}
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      {/* RIGHT SIDE */}
+
+      <div className="bg-zinc-900 rounded-2xl p-8 h-fit border border-cyan-500">
+
+        <h2 className="text-3xl font-bold">
+          Checkout
+        </h2>
+
+        <p className="text-5xl font-bold text-cyan-400 mt-5">
+          ₹{template.price}
+        </p>
+
+        <div className="mt-8">
+
+          <label className="block mb-2">
+            Your Name
+          </label>
+
+          <input
+            value={customerName}
+            onChange={(e) =>
+              setCustomerName(e.target.value)
+            }
+            placeholder="Enter Your Name"
+            className="w-full p-4 rounded-xl bg-black border border-zinc-700"
+          />
+
+        </div>
+
+        <div className="mt-6">
+
+          <label className="block mb-2">
+            Upload Your Photo
+          </label>
+
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImage}
+            className="w-full"
+          />
+
+          {customerImage && (
+            <img
+              src={customerImage}
+              className="mt-5 rounded-xl border border-cyan-500"
+              alt="Preview"
+            />
+          )}
+
+        </div>
+
+                <div className="mt-8 border-t border-zinc-700 pt-6">
+
+          <h3 className="text-xl font-bold mb-4">
+            Order Summary
+          </h3>
+
+          <div className="flex justify-between mb-3">
+            <span>Template</span>
+            <span>{template.title}</span>
+          </div>
+
+          <div className="flex justify-between mb-3">
+            <span>Category</span>
+            <span>{template.category}</span>
+          </div>
+
+          <div className="flex justify-between text-2xl font-bold border-t border-zinc-700 pt-4">
+            <span>Total</span>
+            <span className="text-cyan-400">
+              ₹{template.price}
+            </span>
+          </div>
+
+        </div>
+
+        <PaymentButton
+          templateId={templateId}
+          amount={template.price}
+          templateName={template.title}
+          customerName={customerName}
+          customerImage={customerImage}
+        />
+
+      </div>
+
+    </>
   );
 }

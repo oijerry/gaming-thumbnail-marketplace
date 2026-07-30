@@ -30,13 +30,10 @@ export default async function TemplateDetails({ params }: Props) {
   return (
     <div className="min-h-screen bg-[#050505] text-white py-20 px-6">
       <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12">
-        <TemplateDetailsClient
-          templateId={template._id.toString()}
-          amount={template.price}
-          templateName={template.title}
-          customerName=""
-          customerImage=""
-        />
+       <TemplateDetailsClient
+  templateId={template._id.toString()}
+  template={JSON.parse(JSON.stringify(template))}
+/>
       </div>
     </div>
   );

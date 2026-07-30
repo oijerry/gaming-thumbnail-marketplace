@@ -7,7 +7,7 @@ type Props = {
   amount: number;
   templateName: string;
   customerName: string;
-  customerEmail: string;
+  customerImage: string;
 };
 
 type RazorpayResponse = {
@@ -47,8 +47,10 @@ export default function PaymentButton({
   amount,
   templateName,
   customerName,
-  customerEmail,
+  customerImage,
 }: Props) {
+  const customerEmail = "";
+
   const [loading, setLoading] = useState(false);
 
   const handlePayment = async () => {
