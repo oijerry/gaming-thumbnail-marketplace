@@ -37,7 +37,9 @@ export async function POST(req: NextRequest) {
 
       customerName: body.customerName,
 
-      customerEmail: body.customerEmail,
+customerEmail: body.customerEmail || "",
+
+customerImage: body.customerImage || "",
 
       templateName: body.templateName,
 
@@ -54,6 +56,7 @@ export async function POST(req: NextRequest) {
       razorpayPaymentId: "",
 
       razorpaySignature: "",
+      
     });
 
     return NextResponse.json({

@@ -40,28 +40,24 @@ export async function POST(req: Request) {
     }
 
     const order = await Order.findByIdAndUpdate(
-      orderId,
-      {
-        paymentStatus: "Paid",
+  orderId,
+  {
+    paymentStatus: "Paid",
 
-        status: "Completed",
+    status: "Completed",
 
-        downloadUnlocked: {
-  type: Boolean,
-  default: false,
-},
+    downloadUnlocked: true,
 
-        razorpayOrderId: razorpay_order_id,
+    razorpayOrderId: razorpay_order_id,
 
-        razorpayPaymentId: razorpay_payment_id,
+    razorpayPaymentId: razorpay_payment_id,
 
-        razorpaySignature: razorpay_signature,
-      },
-      {
-        new: true,
-      }
-    );
-
+    razorpaySignature: razorpay_signature,
+  },
+  {
+    new: true,
+  }
+);
     if (!order) {
   return NextResponse.json(
     {
