@@ -53,6 +53,48 @@ export default function PaymentButton({
 
   const [loading, setLoading] = useState(false);
 
+  const [couponCode, setCouponCode] = useState("");
+const [discount, setDiscount] = useState(0);
+const [finalAmount, setFinalAmount] = useState(amount);
+const [couponLoading, setCouponLoading] = useState(false);
+
+const applyCoupon = async () => {
+  if (!couponCode.trim()) {
+    alert("Enter Coupon Code");
+    return;
+  }
+
+  try {
+    setCouponLoading(true);
+
+    const res = await fetch("/api/coupon", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        code: couponCode,
+        amount,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      setDiscount(data.discount);
+      setFinalAmount(data.finalAmount);
+      alert("Coupon Applied ✅");
+    } else {
+      alert(data.message);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Coupon Error");
+  } finally {
+    setCouponLoading(false);
+  }
+};
+
   const handlePayment = async () => {
     if (!customerName.trim()) {
       alert("Please enter your name.");
@@ -72,8 +114,7 @@ export default function PaymentButton({
           templateName,
           customerName,
           customerEmail,
-          price: amount,
-        }),
+price: finalAmount,        }),
       });
 
       const orderJson = await orderRes.json();
@@ -92,8 +133,7 @@ export default function PaymentButton({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          amount,
-        }),
+amount: finalAmount,        }),
       });
 
       const data = await res.json();
