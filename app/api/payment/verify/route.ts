@@ -42,7 +42,9 @@ export async function POST(req: Request) {
     }
 
     const order = await Order.findByIdAndUpdate(
+      
   orderId,
+
 
   {
     paymentStatus: "Paid",
@@ -63,6 +65,9 @@ export async function POST(req: Request) {
   }
   
 );
+
+console.log("Order Updated:", order);
+
     if (!order) {
   return NextResponse.json(
     {
@@ -77,10 +82,11 @@ export async function POST(req: Request) {
 const user = await User.findById(order.userId);
 
 if (user?.email) {
-  await sendEmail(
-    user.email,
-    "Payment Successful ✅",
-    `
+  try {
+    await sendEmail(
+      user.email,
+      "Payment Successful ✅",
+      `
       <div style="font-family:Arial,sans-serif;padding:20px">
         <h2>🎮 Gaming Thumbnail Marketplace</h2>
 
@@ -92,21 +98,21 @@ if (user?.email) {
 
         <p><b>Template:</b> ${order.templateName}</p>
         <p><b>Amount:</b> ₹${order.price}</p>
+
         <p><b>Status:</b> Paid ✅</p>
 
         <hr/>
 
-        <p>
-          Your order is now being processed.
-          You'll receive another email when your thumbnail is completed.
-        </p>
-
-        <br/>
-
-        <h3>Thank you for your purchase ❤️</h3>
+        <p>Your order is now being processed.</p>
       </div>
-    `
-  );
+      `
+    );
+
+    console.log("Email Sent");
+  } catch (err) {
+    console.error("Email Error:", err);
+    // Email fail झाला तरी payment verification fail होणार नाही.
+  }
 }
 
     return NextResponse.json({
