@@ -215,12 +215,65 @@ amount: finalAmount,        }),
   };
 
   return (
+  <div className="mt-8 space-y-5">
+
+    <div className="rounded-2xl border border-cyan-500 bg-zinc-900 p-5">
+
+      <label className="block mb-3 text-sm text-gray-300">
+        Coupon Code
+      </label>
+
+      <div className="flex gap-3">
+
+        <input
+          type="text"
+          value={couponCode}
+          onChange={(e) => setCouponCode(e.target.value)}
+          placeholder="Enter Coupon"
+          className="flex-1 rounded-xl bg-zinc-800 border border-zinc-700 px-4 py-3 text-white outline-none focus:border-cyan-500"
+        />
+
+        <button
+          type="button"
+          onClick={applyCoupon}
+          disabled={couponLoading}
+          className="px-6 rounded-xl bg-yellow-500 text-black font-bold hover:bg-yellow-400"
+        >
+          {couponLoading ? "Checking..." : "Apply"}
+        </button>
+
+      </div>
+
+      {discount > 0 && (
+
+        <div className="mt-4 rounded-xl bg-green-500/20 border border-green-500 p-4">
+
+          <p className="text-green-400 font-bold">
+            Coupon Applied Successfully ✅
+          </p>
+
+          <p className="text-gray-300 mt-2">
+            Discount : ₹{discount}
+          </p>
+
+          <p className="text-xl font-bold text-cyan-400 mt-2">
+            Final Price : ₹{finalAmount}
+          </p>
+
+        </div>
+
+      )}
+
+    </div>
+
     <button
       onClick={handlePayment}
       disabled={loading}
-      className="w-full mt-8 py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xl font-bold hover:scale-105 transition disabled:opacity-50"
+      className="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xl font-bold hover:scale-105 transition disabled:opacity-50"
     >
-      {loading ? "Processing..." : `Pay ₹${amount}`}
+      {loading ? "Processing..." : `Pay ₹${finalAmount}`}
     </button>
-  );
+
+  </div>
+);
 }
