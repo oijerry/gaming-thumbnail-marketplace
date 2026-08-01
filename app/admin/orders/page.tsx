@@ -11,6 +11,7 @@ type Order = {
   status: string;
   paymentStatus: string;
   customerImage: string;
+  completedThumbnail: string;
   createdAt: string;
 };
 
@@ -162,25 +163,44 @@ const [uploading, setUploading] = useState(false);
       className="rounded-xl border border-cyan-500 w-full h-72 object-cover"
     />
   ) : (
+    
+
+    
     <div className="h-72 flex justify-center items-center bg-zinc-800 rounded-xl">
       No Image
     </div>
   )}
-
+  {order.completedThumbnail && (
   <div className="mt-6">
-    <input
-      type="file"
-      accept="image/*"
-      onChange={(e) => {
-        const file = e.target.files?.[0];
+    <h3 className="text-green-400 font-bold mb-3">
+      ✅ Completed Thumbnail
+    </h3>
 
-        if (!file) return;
-
-        void completeOrder(order._id, file);
-      }}
-      disabled={uploading}
-      className="w-full"
+    <img
+      src={order.completedThumbnail}
+      alt="Completed Thumbnail"
+      className="rounded-xl border-2 border-green-500 w-full h-72 object-cover"
     />
+  </div>
+)}
+  <div className="mt-6">
+    <label className="mt-6 flex cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-cyan-500 bg-zinc-800 p-6 text-cyan-400 transition hover:bg-zinc-700">
+  <input
+    type="file"
+    accept="image/*"
+    className="hidden"
+    disabled={uploading}
+    onChange={(e) => {
+      const file = e.target.files?.[0];
+
+      if (!file) return;
+
+      void completeOrder(order._id, file);
+    }}
+  />
+
+  {uploading ? "Uploading..." : "📤 Upload Completed Thumbnail"}
+</label>
   </div>
 
 </div>

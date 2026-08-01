@@ -15,7 +15,20 @@ export async function GET() {
 
     const totalTemplates = await Template.countDocuments();
 
+    const completedOrders = await Order.countDocuments({
+      status: "Completed",
+    });
+
+    const pendingOrders = await Order.countDocuments({
+      status: "Pending",
+    });
+
     const revenue = await Order.aggregate([
+      {
+        $match: {
+          paymentStatus: "Paid",
+        },
+      },
       {
         $group: {
           _id: null,
@@ -41,6 +54,10 @@ export async function GET() {
 
       totalTemplates,
 
+      completedOrders,
+
+      pendingOrders,
+
       totalRevenue:
         revenue.length > 0
           ? revenue[0].total
@@ -51,6 +68,8 @@ export async function GET() {
 
   } catch (error: any) {
 
+    console.error(error);
+
     return NextResponse.json(
       {
         success: false,
@@ -60,6 +79,5 @@ export async function GET() {
         status: 500,
       }
     );
-
   }
 }

@@ -8,8 +8,9 @@ type Order = {
   customerName: string;
   status: string;
   paymentStatus: string;
-  completedThumbnail: string;
   createdAt: string;
+  completedThumbnail: string;
+downloadUnlocked: boolean;
 };
 
 export default function MyOrders() {
@@ -81,6 +82,7 @@ export default function MyOrders() {
             {order.status}
           </span>
         </p>
+       
 
         <p className="mt-2">
           Payment :
