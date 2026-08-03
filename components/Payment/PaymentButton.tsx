@@ -1,5 +1,7 @@
 "use client";
 
+console.log("COUPON VERSION");
+
 import { useState } from "react";
 
 type Props = {
